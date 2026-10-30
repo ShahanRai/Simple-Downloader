@@ -1,0 +1,189 @@
+/* ===================================================================
+   Simple Downloader - Floating Video Grabber & Quality Menu
+   Obsidian Dark / Indigo Fluent Aesthetic
+   =================================================================== */
+
+#idm-video-grabber {
+  position: absolute;
+  z-index: 2147483647;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: #161920;
+  color: #f3f4f6;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #282d38;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+#idm-video-grabber:hover {
+  background: #1f232c;
+  border-color: #6366f1;
+  box-shadow: 0 4px 18px rgba(99, 102, 241, 0.3);
+  transform: translateY(-1px);
+}
+
+.idm-grabber-content {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.idm-bolt {
+  color: #818cf8;
+  display: flex;
+  align-items: center;
+}
+
+.idm-grabber-text {
+  letter-spacing: -0.1px;
+}
+
+.idm-grabber-arrow {
+  font-size: 9px;
+  color: #9ca3af;
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+#idm-video-grabber.menu-open .idm-grabber-arrow {
+  transform: rotate(180deg);
+}
+
+/* ===================================================================
+   Quality Selection Dropdown Menu
+   =================================================================== */
+#idm-grabber-menu {
+  position: absolute;
+  z-index: 2147483647;
+  display: none;
+  flex-direction: column;
+  background: #161920;
+  border: 1px solid #282d38;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  width: 300px;
+  max-width: 90vw;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  animation: idmMenuFadeIn 0.15s ease-out;
+}
+
+@keyframes idmMenuFadeIn {
+  0% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.idm-menu-header {
+  padding: 8px 10px;
+  background: #12141a;
+  border-bottom: 1px solid #282d38;
+}
+
+.idm-menu-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.idm-menu-subtitle {
+  font-size: 10px;
+  color: #9ca3af;
+  display: block;
+  margin-top: 1px;
+}
+
+.idm-menu-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.idm-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  color: #e5e7eb;
+}
+
+.idm-menu-item:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.idm-item-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.idm-play-icon {
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.idm-item-quality {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.idm-item-format {
+  font-size: 9px;
+  font-family: monospace;
+  color: #9ca3af;
+  background: #12141a;
+  border: 1px solid #282d38;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.idm-item-size {
+  font-size: 10px;
+  font-family: monospace;
+  color: #9ca3af;
+}
+
+.idm-menu-item:hover .idm-item-size {
+  color: #818cf8;
+}
+
+.idm-menu-empty {
+  padding: 14px;
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.idm-menu-footer {
+  padding: 5px 10px;
+  background: #12141a;
+  border-top: 1px solid #282d38;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #64748b;
+}
+
+.idm-menu-footer-badge {
+  color: #818cf8;
+  font-weight: 600;
+}

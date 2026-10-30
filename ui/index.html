@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html class="dark" lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Simple Downloader</title>
+
+  <!-- Google Material Symbols Outlined -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "obsidian": {
+              "base": "#0e1015",
+              "card": "#161920",
+              "hover": "#1f232c",
+              "border": "#282d38",
+              "input": "#12141a"
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI Variable Text"', '"Segoe UI"', '"Inter"', 'Roboto', 'sans-serif'],
+            mono: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#f8fafc] dark:bg-[#0e1015] font-sans text-[#0f172a] dark:text-[#f3f4f6] antialiased select-none overflow-hidden h-screen flex flex-col transition-colors duration-150">
+
+  <!-- Single Unified Titlebar Header (Spans across entire window top) -->
+  <header id="app-titlebar" class="fixed top-0 left-0 right-0 h-11 bg-[#ffffff]/90 dark:bg-[#0e1015]/85 backdrop-blur-md border-b border-[#e2e8f0] dark:border-[#282d38] z-50 flex items-center justify-between px-3 select-none transition-colors duration-150">
+    <!-- App Single Brand Title -->
+    <div class="flex items-center gap-2">
+      <img src="icon.png" class="w-5 h-5 rounded-md shadow-xs shrink-0 select-none pointer-events-none" alt="Simple Downloader">
+      <span class="text-xs sm:text-[13px] text-[#1e293b] dark:text-[#f3f4f6] font-semibold tracking-tight">Simple Downloader</span>
+    </div>
+
+    <!-- Header Actions & Controls -->
+    <div class="flex items-center gap-2">
+      <!-- ⌘K Search Filter Input -->
+      <div class="hidden sm:flex items-center gap-1.5 bg-[#f8fafc] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] hover:border-[#cbd5e1] dark:hover:border-[#384050] px-2.5 h-7 rounded-md text-[#64748b] dark:text-[#9ca3af] focus-within:border-[#6366f1] dark:focus-within:border-[#4f46e5] transition-colors w-40">
+        <span class="material-symbols-outlined text-[14px]">search</span>
+        <input type="text" id="input-search" placeholder="⌘K Filter" class="w-full bg-transparent border-0 outline-none text-xs text-[#0f172a] dark:text-[#f3f4f6] placeholder-[#94a3b8] dark:placeholder-[#64748b]">
+      </div>
+
+      <!-- Add URL Button -->
+      <button id="btn-add-download" class="flex items-center gap-1 bg-[#6366f1] hover:bg-[#4f46e5] dark:bg-gradient-to-r dark:from-[#4f46e5] dark:to-[#6366f1] text-white px-2.5 h-7 rounded-md text-xs font-medium shadow-xs transition-all duration-150 shrink-0">
+        <span class="material-symbols-outlined text-[15px]">add</span>
+        <span>Add URL</span>
+      </button>
+
+      <!-- Diagnostic Logs Button -->
+      <button id="btn-open-logs" class="w-7 h-7 rounded-full bg-[#f1f5f9] dark:bg-[#1f232c] text-[#64748b] dark:text-[#9ca3af] hover:text-[#4f46e5] dark:hover:text-[#818cf8] border border-[#e2e8f0] dark:border-[#282d38] flex items-center justify-center hover:scale-105 transition-all shadow-xs" title="Diagnostic Logs & Telemetry">
+        <span class="material-symbols-outlined text-[15px]">terminal</span>
+      </button>
+
+      <!-- Theme Toggle Button -->
+      <button id="btn-theme-toggle" class="w-7 h-7 rounded-full bg-[#f1f5f9] dark:bg-[#1f232c] text-[#64748b] dark:text-[#c3c0ff] border border-[#e2e8f0] dark:border-[#282d38] flex items-center justify-center hover:scale-105 transition-all shadow-xs" title="Toggle Light / Dark Mode">
+        <span id="theme-icon-sun" class="material-symbols-outlined text-[16px]">light_mode</span>
+        <span id="theme-icon-moon" class="material-symbols-outlined text-[16px]" style="display:none;">dark_mode</span>
+      </button>
+
+      <!-- Windows 11 Caption Controls -->
+      <div class="flex items-stretch border-l border-[#e2e8f0] dark:border-[#282d38] ml-1 -mr-3 h-11">
+        <button id="win-minimize" class="w-10 h-full flex items-center justify-center text-[#64748b] dark:text-[#9ca3af] hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] transition-colors" title="Minimize">
+          <span class="text-xs select-none leading-none font-medium">—</span>
+        </button>
+        <button id="win-maximize" class="w-10 h-full flex items-center justify-center text-[#64748b] dark:text-[#9ca3af] hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] transition-colors" title="Maximize">
+          <span class="text-xs select-none leading-none">▢</span>
+        </button>
+        <button id="win-close" class="w-10 h-full flex items-center justify-center text-[#64748b] dark:text-[#9ca3af] hover:bg-[#ef4444] hover:text-white transition-colors" title="Close">
+          <span class="text-xs select-none leading-none">✕</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewport Layout (Sidebar on left under header, Content on right) -->
+  <div class="w-full h-full pt-11 flex overflow-hidden">
+
+    <!-- Left Sidebar Navigation (Positioned cleanly under unified titlebar) -->
+    <aside class="w-52 h-full bg-[#ffffff] dark:bg-[#12141a] border-r border-[#e2e8f0] dark:border-[#282d38] flex flex-col justify-between py-2.5 select-none shrink-0 transition-colors duration-150">
+      <div class="px-2 pt-1">
+        <nav class="flex flex-col gap-0.5" id="sidebar-nav">
+          <!-- Downloads (Active) -->
+          <a aria-current="page" class="nav-item active flex items-center gap-2 px-2.5 py-1.5 rounded-md transition-all duration-150 bg-[#e0e7ff]/70 text-[#4f46e5] text-xs font-semibold shadow-xs border border-[#c7d2fe]/50 dark:bg-[#1f232c] dark:text-[#f3f4f6] dark:border-[#282d38] w-full text-left cursor-pointer" data-category="all" href="#">
+            <span class="material-symbols-outlined text-[16px] text-[#4f46e5] dark:text-[#818cf8]">downloading</span>
+            <span>Downloads</span>
+          </a>
+
+          <!-- Completed -->
+          <a class="nav-item flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[#64748b] dark:text-[#9ca3af] hover:bg-[#f1f5f9] dark:hover:bg-[#161920] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] text-xs transition-colors w-full text-left border border-transparent cursor-pointer" data-category="completed" href="#">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+            <span>Completed</span>
+          </a>
+
+          <!-- Settings -->
+          <a id="btn-open-settings" class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[#64748b] dark:text-[#9ca3af] hover:bg-[#f1f5f9] dark:hover:bg-[#161920] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] text-xs transition-colors w-full text-left border border-transparent cursor-pointer" href="#">
+            <span class="material-symbols-outlined text-[16px]">settings</span>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bottom Status Card in Sidebar (v1.0) -->
+      <div class="px-2">
+        <div class="bg-[#f8fafc] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] rounded-md p-1.5 px-2 flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-1.5">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></div>
+            <span class="text-[11px] text-[#64748b] dark:text-[#9ca3af] font-medium" id="titlebar-status-text">Ready</span>
+          </div>
+          <span class="text-[10px] text-[#94a3b8] dark:text-[#64748b] tabular-numbers font-medium">v1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto bg-[#f8fafc] dark:bg-[#0e1015] transition-colors duration-150">
+      <div class="p-3 sm:p-3.5 max-w-6xl mx-auto w-full flex flex-col gap-2.5 pb-3">
+
+        <!-- Top URL Capture Panel -->
+        <section class="bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] rounded-lg p-2.5 shadow-xs flex flex-col gap-1.5 transition-colors duration-150">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
+            <!-- URL input box with NO inner border -->
+            <div class="flex-1 bg-[#f8fafc] dark:bg-[#12141a] border border-[#e2e8f0] dark:border-[#282d38] rounded-md flex items-center px-2.5 h-8 gap-2 focus-within:border-[#6366f1] dark:focus-within:border-[#4f46e5] focus-within:bg-[#ffffff] dark:focus-within:bg-[#161920] transition-colors">
+              <span class="material-symbols-outlined text-[#64748b] dark:text-[#64748b] text-[16px]">link</span>
+              <input id="quick-url-input" class="w-full bg-transparent border-0 outline-none text-xs text-[#0f172a] dark:text-[#f3f4f6] placeholder-[#94a3b8] dark:placeholder-[#64748b]" placeholder="Paste download URL or magnet link (Ctrl+V)..." type="text">
+              <button id="quick-btn-clipboard" class="flex items-center gap-1 px-1.5 h-5 rounded bg-[#e0e7ff]/70 dark:bg-[#1f232c] border border-[#c7d2fe]/70 dark:border-[#282d38] text-[#4f46e5] dark:text-emerald-400 text-[10px] whitespace-nowrap hover:bg-[#e0e7ff] dark:hover:bg-[#282d38] transition-colors" title="Paste from clipboard">
+                <span class="material-symbols-outlined text-[12px]">content_paste</span>
+                <span>Clipboard</span>
+              </button>
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0">
+              <!-- Quick Destination Selector with Dropdown Menu -->
+              <div class="relative">
+                <div id="quick-destination-btn" class="bg-[#f8fafc] dark:bg-[#12141a] hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] rounded-md px-2 h-8 flex items-center gap-1 cursor-pointer transition-colors text-[#64748b] dark:text-[#9ca3af] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] text-xs" title="Select Download Folder">
+                  <span class="material-symbols-outlined text-[15px]">folder</span>
+                  <span id="quick-destination-label" class="truncate max-w-[100px]">~/Downloads</span>
+                  <span id="quick-destination-arrow" class="material-symbols-outlined text-[13px] transition-transform duration-150">expand_more</span>
+                </div>
+                <!-- Quick Destination Dropdown Menu -->
+                <div id="quick-destination-menu" class="absolute right-0 top-full mt-1 w-60 bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] rounded-lg shadow-xl p-1 z-50 text-xs hidden flex-col">
+                  <div class="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8] dark:text-[#64748b]">Quick Locations</div>
+                  <button type="button" class="dest-menu-item flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] text-[#334155] dark:text-[#d1d5db] transition-colors text-left" data-target="downloads">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[15px] text-[#4f46e5] dark:text-[#818cf8]">download</span>
+                      <span>Downloads</span>
+                    </div>
+                    <span class="text-[10px] text-[#94a3b8] dark:text-[#64748b]">Default</span>
+                  </button>
+                  <button type="button" class="dest-menu-item flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] text-[#334155] dark:text-[#d1d5db] transition-colors text-left" data-target="desktop">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[15px] text-[#2563eb] dark:text-[#60a5fa]">desktop_windows</span>
+                      <span>Desktop</span>
+                    </div>
+                  </button>
+                  <button type="button" class="dest-menu-item flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] text-[#334155] dark:text-[#d1d5db] transition-colors text-left" data-target="videos">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[15px] text-[#a855f7] dark:text-[#c084fc]">movie</span>
+                      <span>Videos</span>
+                    </div>
+                  </button>
+                  <button type="button" class="dest-menu-item flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] text-[#334155] dark:text-[#d1d5db] transition-colors text-left" data-target="documents">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[15px] text-[#059669] dark:text-[#34d399]">description</span>
+                      <span>Documents</span>
+                    </div>
+                  </button>
+                  <div class="h-px bg-[#e2e8f0] dark:bg-[#282d38] my-1"></div>
+                  <button type="button" id="dest-menu-browse-btn" class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-[#e0e7ff] dark:hover:bg-[#1f232c] text-[#4f46e5] dark:text-[#818cf8] font-medium transition-colors text-left">
+                    <span class="material-symbols-outlined text-[15px]">folder_open</span>
+                    <span>Browse Custom Folder...</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Download Action Button -->
+              <button id="quick-btn-download" class="bg-[#6366f1] hover:bg-[#4f46e5] dark:bg-gradient-to-r dark:from-[#4f46e5] dark:to-[#6366f1] text-white px-3.5 h-8 rounded-md text-xs font-semibold flex items-center gap-1 transition-all shadow-xs shrink-0">
+                <span class="material-symbols-outlined text-[16px]">download</span>
+                <span id="quick-btn-text">Download</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Options Strip with High-Visibility Checkboxes & Real Drive Free Space -->
+          <div class="flex items-center justify-between px-0.5 text-[#64748b] dark:text-[#64748b] text-[11px] pt-0.5">
+            <div class="flex items-center gap-4">
+              <label class="form-checkbox-label" for="quick-auto-start">
+                <input id="quick-auto-start" checked class="app-checkbox" type="checkbox">
+                <span>Start automatically</span>
+              </label>
+              <label class="form-checkbox-label" for="quick-unpack">
+                <input id="quick-unpack" checked class="app-checkbox" type="checkbox">
+                <span>Unpack archive</span>
+              </label>
+            </div>
+            <!-- Real free space of selected drive dynamically computed from Windows API -->
+            <span id="quick-disk-space" class="text-[11px] text-[#94a3b8] dark:text-[#64748b] tabular-numbers font-medium">Free space (C:): Calculating...</span>
+          </div>
+        </section>
+
+        <!-- Filter Control Bar -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1 bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] p-0.5 rounded-lg shadow-xs">
+            <button class="nav-item filter-tab-btn active px-2.5 h-6 rounded-md bg-[#6366f1] dark:bg-[#1f232c] text-white dark:text-[#f3f4f6] text-xs font-medium transition-colors border border-transparent dark:border-[#282d38] shadow-xs" data-category="all">
+              All <span class="tabular-numbers text-white/90 dark:text-[#818cf8] ml-0.5" id="filter-count-all">0</span>
+            </button>
+            <button class="nav-item filter-tab-btn px-2.5 h-6 rounded-md hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] text-[#64748b] dark:text-[#9ca3af] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] text-xs transition-colors border border-transparent" data-category="downloading">
+              Active <span class="tabular-numbers text-[#64748b] dark:text-[#64748b] ml-0.5" id="filter-count-active">0</span>
+            </button>
+            <button class="nav-item filter-tab-btn px-2.5 h-6 rounded-md hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] text-[#64748b] dark:text-[#9ca3af] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] text-xs transition-colors border border-transparent" data-category="paused">
+              Paused <span class="tabular-numbers text-[#64748b] dark:text-[#64748b] ml-0.5" id="filter-count-paused">0</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <!-- Speed Limiter Quick Control -->
+            <div class="relative" id="speed-limiter-container">
+              <button id="btn-speed-limiter" class="h-7 px-2.5 rounded-md bg-[#ffffff] dark:bg-[#161920] hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] flex items-center gap-1.5 text-xs text-[#64748b] dark:text-[#9ca3af] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] transition-colors shadow-xs cursor-pointer select-none" title="Configure Speed Limiter">
+                <span class="material-symbols-outlined text-[15px] text-[#2563eb] dark:text-[#818cf8]" id="speed-limiter-icon">speed</span>
+                <span class="font-medium tabular-numbers text-[11px]" id="speed-limiter-label">Unlimited</span>
+                <span class="material-symbols-outlined text-[13px] text-[#94a3b8] dark:text-[#64748b] transition-transform duration-200" id="speed-limiter-arrow">expand_more</span>
+              </button>
+
+              <!-- Speed Limiter Flyout Dropdown -->
+              <div id="speed-limiter-menu" class="hidden absolute right-0 top-full mt-1.5 w-64 bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] rounded-xl shadow-2xl p-3 z-50 flex-col gap-2.5 transition-all text-xs">
+                <!-- Dropdown Header -->
+                <div class="flex items-center justify-between pb-2 border-b border-[#e2e8f0] dark:border-[#282d38]">
+                  <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-[#2563eb] dark:text-[#818cf8]">speed</span>
+                    <span class="text-xs font-semibold text-[#0f172a] dark:text-[#f3f4f6]">Speed Limiter</span>
+                  </div>
+                  <span id="speed-limiter-badge" class="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-slate-100 dark:bg-[#1f232c] text-[#64748b] dark:text-[#9ca3af] border border-[#e2e8f0] dark:border-[#282d38]">Off</span>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="flex flex-col gap-1">
+                  <span class="text-[10px] text-[#94a3b8] dark:text-[#64748b] font-medium uppercase tracking-wider">Presets</span>
+                  <div class="grid grid-cols-3 gap-1" id="speed-presets-grid">
+                    <button type="button" class="speed-preset-btn active px-2 py-1.5 rounded-md text-[11px] font-medium border text-center transition-all bg-[#6366f1] text-white border-[#6366f1] dark:bg-[#4f46e5] dark:border-[#4f46e5]" data-speed="0">Unlimited</button>
+                    <button type="button" class="speed-preset-btn px-2 py-1.5 rounded-md text-[11px] font-medium border text-center transition-all bg-[#f8fafc] dark:bg-[#1f232c] text-[#0f172a] dark:text-[#f3f4f6] border-[#e2e8f0] dark:border-[#282d38] hover:border-[#6366f1]" data-speed="524288">512 KB/s</button>
+                    <button type="button" class="speed-preset-btn px-2 py-1.5 rounded-md text-[11px] font-medium border text-center transition-all bg-[#f8fafc] dark:bg-[#1f232c] text-[#0f172a] dark:text-[#f3f4f6] border-[#e2e8f0] dark:border-[#282d38] hover:border-[#6366f1]" data-speed="1048576">1 MB/s</button>
+                    <button type="button" class="speed-preset-btn px-2 py-1.5 rounded-md text-[11px] font-medium border text-center transition-all bg-[#f8fafc] dark:bg-[#1f232c] text-[#0f172a] dark:text-[#f3f4f6] border-[#e2e8f0] dark:border-[#282d38] hover:border-[#6366f1]" data-speed="2097152">2 MB/s</button>
+                    <button type="button" class="speed-preset-btn px-2 py-1.5 rounded-md text-[11px] font-medium border text-center transition-all bg-[#f8fafc] dark:bg-[#1f232c] text-[#0f172a] dark:text-[#f3f4f6] border-[#e2e8f0] dark:border-[#282d38] hover:border-[#6366f1]" data-speed="5242880">5 MB/s</button>
+                    <button type="button" class="speed-preset-btn px-2 py-1.5 rounded-md text-[11px] font-medium border text-center transition-all bg-[#f8fafc] dark:bg-[#1f232c] text-[#0f172a] dark:text-[#f3f4f6] border-[#e2e8f0] dark:border-[#282d38] hover:border-[#6366f1]" data-speed="10485760">10 MB/s</button>
+                  </div>
+                </div>
+
+                <!-- Custom Slider & Input -->
+                <div class="flex flex-col gap-1.5 pt-2 border-t border-[#e2e8f0] dark:border-[#282d38]">
+                  <div class="flex items-center justify-between text-[11px] text-[#64748b] dark:text-[#9ca3af]">
+                    <span>Custom Target:</span>
+                    <span id="speed-slider-label" class="font-semibold tabular-numbers text-[#0f172a] dark:text-[#f3f4f6]">Unlimited</span>
+                  </div>
+                  <input type="range" id="speed-limiter-slider" min="0" max="50" step="0.5" value="0" class="w-full accent-[#6366f1] h-1.5 bg-[#f1f5f9] dark:bg-[#12141a] rounded-lg cursor-pointer">
+                  <div class="flex items-center gap-1.5 pt-0.5">
+                    <input type="number" id="speed-limiter-input" min="0" max="1000" step="0.5" placeholder="Value" class="flex-1 bg-[#f8fafc] dark:bg-[#12141a] border border-[#e2e8f0] dark:border-[#282d38] rounded px-2 py-1 text-xs text-[#0f172a] dark:text-[#f3f4f6] focus:border-[#6366f1] outline-none tabular-numbers">
+                    <select id="speed-limiter-unit" class="bg-[#f8fafc] dark:bg-[#12141a] border border-[#e2e8f0] dark:border-[#282d38] rounded px-1.5 py-1 text-xs text-[#0f172a] dark:text-[#f3f4f6] outline-none cursor-pointer">
+                      <option value="KB">KB/s</option>
+                      <option value="MB" selected>MB/s</option>
+                    </select>
+                    <button type="button" id="btn-apply-custom-speed" class="px-2.5 py-1 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded text-xs font-semibold transition-all">Set</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button id="btn-resume-selected" class="w-7 h-7 rounded-md bg-[#ffffff] dark:bg-[#161920] hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] flex items-center justify-center text-[#64748b] dark:text-[#9ca3af] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] transition-colors shadow-xs" title="Resume downloads">
+              <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+            </button>
+            <button id="btn-pause-selected" class="w-7 h-7 rounded-md bg-[#ffffff] dark:bg-[#161920] hover:bg-[#f1f5f9] dark:hover:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] flex items-center justify-center text-[#64748b] dark:text-[#9ca3af] hover:text-[#0f172a] dark:hover:text-[#f3f4f6] transition-colors shadow-xs" title="Pause downloads">
+              <span class="material-symbols-outlined text-[16px]">pause</span>
+            </button>
+            <button id="btn-delete-selected" class="w-7 h-7 rounded-md bg-[#ffffff] dark:bg-[#161920] hover:bg-[#fef2f2] dark:hover:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] flex items-center justify-center text-[#64748b] dark:text-[#9ca3af] hover:text-red-400 transition-colors shadow-xs" title="Clear completed / queue">
+              <span class="material-symbols-outlined text-[16px]">clear_all</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Real Active Downloads Container -->
+        <div id="downloads-container" class="flex flex-col gap-2 min-h-0"></div>
+
+        <!-- Clean Empty State (Shown ONLY when queue has 0 items) -->
+        <div id="table-empty-state" class="bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] border-dashed rounded-xl p-8 sm:p-10 flex flex-col items-center justify-center text-center gap-2 shadow-xs transition-colors duration-150">
+          <div class="w-10 h-10 rounded-lg bg-[#eff6ff] dark:bg-[#1f232c] border border-[#dbeafe] dark:border-[#282d38] flex items-center justify-center text-[#2563eb] dark:text-[#818cf8]">
+            <span class="material-symbols-outlined text-[24px]">cloud_download</span>
+          </div>
+          <h3 class="text-xs sm:text-sm text-[#0f172a] dark:text-[#f3f4f6] font-semibold">No Downloads in Queue</h3>
+          <p class="text-xs text-[#64748b] dark:text-[#9ca3af] max-w-sm">Click "Add URL" above or paste any download link into the capture box.</p>
+          <button id="btn-empty-add" class="flex items-center gap-1 bg-[#6366f1] hover:bg-[#4f46e5] dark:bg-gradient-to-r dark:from-[#4f46e5] dark:to-[#6366f1] text-white px-3 h-7 rounded-md text-xs font-medium transition-all shadow-xs mt-1">
+            <span class="material-symbols-outlined text-[15px]">add</span>
+            <span>Add Download</span>
+          </button>
+        </div>
+
+        <!-- Expandable Multi-Stream Inspector Drawer -->
+        <section id="visualizer-panel" class="bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] rounded-lg p-2.5 shadow-xs flex flex-col gap-1.5 transition-all duration-200" style="display:none;">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="bg-[#eff6ff] text-[#2563eb] border border-[#dbeafe] dark:bg-[#4f46e5]/20 dark:text-[#a5b4fc] dark:border-[#4f46e5]/30 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider shrink-0">MULTI-STREAM</span>
+              <span id="visualizer-filename" class="text-xs text-[#0f172a] dark:text-[#f3f4f6] font-medium truncate">No download selected</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span id="visualizer-stream-count" class="tabular-numbers text-[10px] bg-[#f8fafc] dark:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] px-1.5 py-0.5 rounded text-[#64748b] dark:text-[#9ca3af]">0 Streams</span>
+              <span id="visualizer-ratio" class="tabular-numbers text-[10px] bg-[#f8fafc] dark:bg-[#1f232c] border border-[#e2e8f0] dark:border-[#282d38] px-1.5 py-0.5 rounded text-[#0f172a] dark:text-[#f3f4f6]">0 B / 0 B</span>
+              <button onclick="document.getElementById('visualizer-panel').style.display='none'" class="text-[#64748b] dark:text-[#9ca3af] hover:text-red-400 text-xs px-1">✕</button>
+            </div>
+          </div>
+
+          <div class="w-full bg-[#f1f5f9] dark:bg-[#12141a] rounded-md h-2.5 overflow-hidden border border-[#e2e8f0] dark:border-[#282d38]/50 relative">
+            <div id="visualizer-bar-fill" class="h-full w-full relative"></div>
+          </div>
+
+          <div id="visualizer-threads-grid" class="flex flex-wrap gap-1 pt-0.5"></div>
+        </section>
+
+        <!-- Aggregate Stats Summary Footer -->
+        <footer class="bg-[#ffffff] dark:bg-[#161920] border border-[#e2e8f0] dark:border-[#282d38] rounded-lg px-3 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 shadow-xs transition-colors duration-150">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1 text-[#0f172a] dark:text-[#f3f4f6] text-xs">
+              <span class="material-symbols-outlined text-[#2563eb] dark:text-[#818cf8] text-[16px]">speed</span>
+              <span class="font-semibold tabular-numbers" id="footer-total-speed">0.0 KB/s</span>
+              <span class="text-[11px] text-[#64748b] dark:text-[#64748b]">Total Speed</span>
+              <button id="footer-speed-limiter-pill" class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 cursor-pointer transition-colors bg-slate-100 dark:bg-[#1f232c] text-[#64748b] dark:text-[#9ca3af] border-[#e2e8f0] dark:border-[#282d38] hover:border-[#6366f1]" title="Click to adjust speed limit">
+                <span class="material-symbols-outlined text-[11px] text-[#94a3b8] dark:text-[#64748b]">tune</span>
+                <span id="footer-limiter-text">Unlimited</span>
+              </button>
+            </div>
+            <div class="h-3 w-px bg-[#e2e8f0] dark:bg-[#282d38]"></div>
+            <div class="flex items-center gap-1 text-[11px] text-[#64748b] dark:text-[#9ca3af]" id="footer-files-summary">
+              <span class="font-semibold tabular-numbers text-[#0f172a] dark:text-[#f3f4f6]" id="footer-count-downloading">0</span> files downloading, <span class="font-semibold tabular-numbers text-[#0f172a] dark:text-[#f3f4f6]" id="footer-count-paused">0</span> paused
+            </div>
+          </div>
+          <div class="flex items-center gap-3 tabular-numbers text-[11px] text-[#64748b] dark:text-[#9ca3af]">
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[#94a3b8] dark:text-[#64748b] text-[14px]">timer</span>
+              <span id="footer-time-remaining">Time Remaining: —</span>
+            </div>
+            <div class="h-3 w-px bg-[#e2e8f0] dark:bg-[#282d38]"></div>
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[#94a3b8] dark:text-[#64748b] text-[14px]">hard_drive</span>
+              <span class="font-medium text-[#475569] dark:text-[#9ca3af]" id="footer-total-bytes">0 B / 0 B</span>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Add Download -->
+  <div class="modal-overlay" id="modal-add-download">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-badge">
+            <span class="material-symbols-outlined text-[16px]">add_link</span>
+          </div>
+          <h3>Add New Download</h3>
+        </div>
+        <button class="modal-btn-close" data-close-modal="modal-add-download">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="modal-error-banner" class="modal-banner banner-error flex items-center gap-1.5 p-2 rounded bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 text-xs" style="display:none;">
+          <span class="material-symbols-outlined text-[15px]">error</span>
+          <span id="modal-error-message">Error message</span>
+        </div>
+
+        <label class="form-label">URL, Direct Link or Magnet</label>
+        <div class="form-input-group">
+          <input type="text" id="input-download-url" class="form-input" placeholder="https://example.com/file.zip or magnet:?xt=...">
+          <button id="btn-paste-url" class="btn-input-addon" title="Paste from clipboard">
+            <span class="material-symbols-outlined text-[14px]">content_paste</span>
+            <span>Paste</span>
+          </button>
+          <button id="btn-probe-url" class="btn-input-addon btn-addon-accent" title="Inspect Remote Server">
+            <span class="material-symbols-outlined text-[14px]">search</span>
+            <span>Inspect</span>
+          </button>
+        </div>
+
+        <!-- URL Probe Information Card -->
+        <div class="probe-info-card" id="probe-card">
+          <div id="probe-loading" class="flex items-center gap-2 py-1 text-[#64748b] dark:text-[#9ca3af]" style="display:none;">
+            <span class="material-symbols-outlined animate-spin text-[16px]">refresh</span>
+            <span>Probing remote server headers...</span>
+          </div>
+          <div id="probe-details" class="probe-details">
+            <div class="probe-line">
+              <span class="probe-key">File:</span>
+              <span class="probe-val" id="probe-val-filename">—</span>
+            </div>
+            <div class="probe-line">
+              <span class="probe-key">Size:</span>
+              <span class="probe-val" id="probe-val-size">—</span>
+            </div>
+            <div class="probe-line">
+              <span class="probe-key">Multi-Stream:</span>
+              <span class="probe-val" id="probe-val-ranges">—</span>
+            </div>
+          </div>
+        </div>
+
+        <label class="form-label">Save Location</label>
+        <div class="form-input-group">
+          <input type="text" id="input-save-path" class="form-input" placeholder="C:\Users\...\Downloads">
+          <button id="btn-browse-folder" class="btn-input-addon" title="Browse Save Location">
+            <span class="material-symbols-outlined text-[14px]">folder_open</span>
+            <span>Browse</span>
+          </button>
+        </div>
+
+        <div class="form-row-split">
+          <div class="form-col">
+            <label class="form-label">Parallel Connections</label>
+            <div class="custom-select" id="custom-select-add-streams">
+              <button type="button" class="custom-select-btn" id="btn-trigger-add-streams">
+                <span id="label-add-streams">16 Streams (Recommended)</span>
+                <span class="material-symbols-outlined text-[15px] custom-select-arrow">expand_more</span>
+              </button>
+              <div class="custom-select-menu" id="menu-add-streams" style="display:none;">
+                <div class="custom-select-item" data-value="1">1 Stream (Single Connection)</div>
+                <div class="custom-select-item" data-value="4">4 Streams</div>
+                <div class="custom-select-item" data-value="8">8 Streams</div>
+                <div class="custom-select-item active" data-value="16">16 Streams (Recommended)</div>
+                <div class="custom-select-item" data-value="32">32 Maximum Streams</div>
+              </div>
+              <input type="hidden" id="select-connections" value="16">
+            </div>
+          </div>
+
+          <div class="form-col" style="padding-bottom: 4px;">
+            <label class="form-checkbox-label" for="checkbox-start-immediately">
+              <input type="checkbox" id="checkbox-start-immediately" checked class="app-checkbox">
+              <span>Start immediately</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close-modal="modal-add-download">Cancel</button>
+        <button id="btn-submit-download" class="btn-primary">Start Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings / Preferences (Complete Themed Dialog with requested options) -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-badge">
+            <span class="material-symbols-outlined text-[16px]">settings</span>
+          </div>
+          <h3>Preferences</h3>
+        </div>
+        <button class="modal-btn-close" data-close-modal="modal-settings">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Download Directory -->
+        <label class="form-label">Default Downloads Directory</label>
+        <div class="form-input-group">
+          <input type="text" id="settings-default-dir" class="form-input">
+          <button id="btn-settings-browse" class="btn-input-addon" title="Browse">
+            <span class="material-symbols-outlined text-[14px]">folder_open</span>
+            <span>Browse</span>
+          </button>
+        </div>
+
+        <!-- Themed Custom Dropdown -->
+        <label class="form-label" style="margin-top: 4px;">Default Parallel Streams</label>
+        <div class="custom-select" id="custom-select-settings-streams">
+          <button type="button" class="custom-select-btn" id="btn-trigger-settings-streams">
+            <span id="label-settings-streams">16 Streams (Recommended)</span>
+            <span class="material-symbols-outlined text-[15px] custom-select-arrow">expand_more</span>
+          </button>
+          <div class="custom-select-menu" id="menu-settings-streams" style="display:none;">
+            <div class="custom-select-item" data-value="4">4 Streams</div>
+            <div class="custom-select-item" data-value="8">8 Streams</div>
+            <div class="custom-select-item active" data-value="16">16 Streams (Recommended)</div>
+            <div class="custom-select-item" data-value="32">32 Streams</div>
+          </div>
+          <input type="hidden" id="settings-default-connections" value="16">
+        </div>
+
+        <!-- Global Speed Limit -->
+        <label class="form-label" style="margin-top: 6px;">Global Download Speed Limit</label>
+        <div class="flex items-center gap-2">
+          <input type="number" id="settings-speed-limit-val" min="0" step="0.5" placeholder="0 (Unlimited)" class="form-input" style="flex: 2;">
+          <select id="settings-speed-limit-unit" class="form-input" style="flex: 1; padding: 6px 8px;">
+            <option value="KB">KB/s</option>
+            <option value="MB" selected>MB/s</option>
+          </select>
+          <button type="button" id="btn-settings-unlimited" class="btn-input-addon" style="padding: 6px 12px;" title="Set to Unlimited">
+            <span>Unlimited</span>
+          </button>
+        </div>
+        <span class="text-[11px] text-[#94a3b8] dark:text-[#64748b] pt-0.5">Set to 0 to download at full uncapped network speed.</span>
+
+        <!-- System & Automation Checkboxes -->
+        <div class="flex flex-col gap-2 pt-1 border-t border-[#e2e8f0] dark:border-[#282d38] mt-1">
+          <label class="form-checkbox-label" for="settings-clipboard-sniff">
+            <input type="checkbox" id="settings-clipboard-sniff" checked class="app-checkbox">
+            <span>Auto-detect copied URLs in Windows Clipboard</span>
+          </label>
+
+          <label class="form-checkbox-label" for="settings-launch-startup">
+            <input type="checkbox" id="settings-launch-startup" class="app-checkbox">
+            <span>Run on Windows startup</span>
+          </label>
+
+          <label class="form-checkbox-label" for="settings-minimize-tray">
+            <input type="checkbox" id="settings-minimize-tray" class="app-checkbox">
+            <span>Minimize to system tray</span>
+          </label>
+
+          <label class="form-checkbox-label" for="settings-keep-awake">
+            <input type="checkbox" id="settings-keep-awake" class="app-checkbox">
+            <span>Keep PC awake while downloading</span>
+          </label>
+
+          <label class="form-checkbox-label" for="settings-restart-complete">
+            <input type="checkbox" id="settings-restart-complete" class="app-checkbox">
+            <span>Restart computer on download complete</span>
+          </label>
+        </div>
+
+        <!-- Browser Integration -->
+        <div style="margin-top: 6px; padding-top: 8px; border-top: 1px solid #e2e8f0;" class="dark:border-[#282d38]">
+          <label class="form-label">Browser Integration</label>
+          <div class="flex items-center justify-between mt-1">
+            <span class="text-xs text-[#64748b] dark:text-[#9ca3af]">Simple Downloader Extension</span>
+            <button id="btn-open-extension-folder" class="btn-secondary text-xs py-1 px-2.5 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">extension</span>
+              <span>Open Extension Folder</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close-modal="modal-settings">Cancel</button>
+        <button id="btn-save-settings" class="btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmation Dialog -->
+  <div class="modal-overlay" id="modal-confirm-dialog" style="z-index: 2000;">
+    <div class="modal-window modal-window-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div id="confirm-dialog-icon-wrap" class="modal-icon-badge modal-icon-danger">
+            <span id="confirm-icon-danger" class="material-symbols-outlined text-[16px]">delete</span>
+            <span id="confirm-icon-info" class="material-symbols-outlined text-[16px]" style="display:none;">info</span>
+          </div>
+          <h3 id="confirm-dialog-title">Confirm Action</h3>
+        </div>
+      </div>
+
+      <div class="modal-body flex flex-col gap-2.5">
+        <p id="confirm-dialog-message" class="text-xs text-[#334155] dark:text-[#d1d5db]">Are you sure you want to proceed?</p>
+        <label id="confirm-dialog-file-option" class="flex items-center gap-2 text-xs text-[#475569] dark:text-[#9ca3af] cursor-pointer select-none pt-1" style="display: none;">
+          <input type="checkbox" id="confirm-delete-disk-file" class="w-4 h-4 rounded border-[#cbd5e1] dark:border-[#424754] text-[#4f46e5] dark:text-[#818cf8] focus:ring-0 cursor-pointer">
+          <span>Also delete downloaded file from disk</span>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button id="confirm-btn-cancel" class="btn-secondary">Cancel</button>
+        <button id="confirm-btn-ok" class="btn-primary btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Diagnostic Logs Viewer -->
+  <div class="modal-overlay" id="modal-logs-dialog" style="z-index: 2000;">
+    <div class="modal-window" style="max-width: 840px; width: 92%;">
+      <div class="modal-header">
+        <div class="modal-title-group flex items-center gap-2">
+          <div class="modal-icon-badge">
+            <span class="material-symbols-outlined text-[16px] text-[#4f46e5] dark:text-[#818cf8]">terminal</span>
+          </div>
+          <h3 class="text-sm font-semibold text-[#0f172a] dark:text-[#f3f4f6]">Diagnostic Logs & Telemetry</h3>
+          <span class="text-[10px] bg-[#10b981]/15 text-[#10b981] px-1.5 py-0.5 rounded font-mono font-medium flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></span> LIVE
+          </span>
+        </div>
+        <button class="modal-close" data-close-modal="modal-logs-dialog">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body flex flex-col gap-2.5">
+        <!-- Log Viewer Toolbar -->
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-[#f8fafc] dark:bg-[#12141a] border border-[#e2e8f0] dark:border-[#282d38] px-2.5 h-7 rounded-md text-[#64748b] dark:text-[#9ca3af] w-52">
+              <span class="material-symbols-outlined text-[14px]">search</span>
+              <input type="text" id="log-search-filter" placeholder="Search logs..." class="w-full bg-transparent border-0 outline-none text-xs text-[#0f172a] dark:text-[#f3f4f6]">
+            </div>
+            <select id="log-level-filter" class="form-input text-xs py-1 px-2 h-7" style="width: auto;">
+              <option value="ALL">All Levels</option>
+              <option value="INFO">Info</option>
+              <option value="WARN">Warnings</option>
+              <option value="ERROR">Errors</option>
+              <option value="TORRENT">Torrent Only</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-copy-logs" class="btn-primary text-xs py-1 px-3 flex items-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-[14px]" id="copy-log-icon">content_copy</span>
+              <span id="copy-log-text">Copy Detailed Log</span>
+            </button>
+            <button id="btn-clear-logs" class="btn-secondary text-xs py-1 px-2.5 flex items-center gap-1 cursor-pointer" title="Clear Buffer">
+              <span class="material-symbols-outlined text-[14px]">delete_sweep</span>
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Output Window -->
+        <div id="logs-terminal" class="w-full h-80 bg-[#090b0e] border border-[#282d38] rounded-md p-2.5 font-mono text-[11px] leading-relaxed text-[#e2e8f0] overflow-y-auto select-text whitespace-pre-wrap">
+          <div class="text-[#64748b] italic">Loading telemetry logs...</div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-[#64748b] dark:text-[#9ca3af]">
+          <span id="log-stats-count">0 log events recorded</span>
+          <span class="italic">Auto-refreshes while open</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close-modal="modal-logs-dialog">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "idm",
+  "version": "1.0.0",
+  "description": "**Internet Downloader** is an executive-grade, high-performance multi-connection segmented download manager and media extraction suite for Windows. Inspired by the core mechanics of Internet Download Manager (IDM), featuring an ultra-modern **Neumorphic UI & UX**, **Real-Time Dynamic Connection Stream Visualizer**, **YouTube & Streaming Media Acceleration Engine**, and **Chrome/Edge/Firefox Browser Integration**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/cli": "^2.12.4"
+  }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Downloader</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <span class="bolt">⚡</span>
+        <span class="title">Simple Downloader</span>
+      </div>
+      <div class="version">v1.0</div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="card status-card">
+      <div class="status-indicator">
+        <span id="status-dot" class="dot offline"></span>
+        <span id="status-text">Checking desktop engine...</span>
+      </div>
+      <div id="stats-detail" class="stats-detail">--</div>
+    </div>
+
+    <!-- Quick Download Box -->
+    <div class="card">
+      <div class="label">Quick Download</div>
+      <div class="input-row">
+        <input type="text" id="quick-url" placeholder="Paste URL here..." />
+        <button id="quick-btn" class="neu-btn primary">Download</button>
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <div class="card">
+      <div class="setting-row">
+        <span>Intercept Downloads</span>
+        <label class="switch">
+          <input type="checkbox" id="intercept-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <span>Floating Video Grabber</span>
+        <label class="switch">
+          <input type="checkbox" id="video-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>Dynamic Multi-Stream Acceleration</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

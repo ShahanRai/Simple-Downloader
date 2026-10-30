@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Build artifacts & executables
+dist/
+build/
+*.exe
+*.old
+*.spec
+target/
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Temporary / Scratch files
+scratch/
+browser_extension.zip
+data/tasks_queue.json

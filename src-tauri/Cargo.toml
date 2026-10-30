@@ -1,0 +1,36 @@
+[package]
+name = "internet-downloader"
+version = "1.0.0"
+description = "Internet Downloader - High-Speed Segmented Acceleration Engine"
+authors = ["Internet Downloader Team"]
+license = "MIT"
+edition = "2024"
+rust-version = "1.90"
+
+[lib]
+name = "internet_downloader_lib"
+crate-type = ["staticlib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.12.5", features = ["tray-icon"] }
+tauri-plugin-log = "2"
+
+# High-Performance Async Network & Multi-Stream Engine
+tokio = { version = "1.43", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
+futures-util = "0.3"
+uuid = { version = "1.13", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+url = "2.5"
+anyhow = "1.0"
+
+# Windows Explorer & OS Integration
+open = "5.3"
+arboard = "3.4"
+tiny_http = "0.12"

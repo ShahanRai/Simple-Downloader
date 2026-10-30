@@ -1,0 +1,11 @@
+{
+  "name": "com.idm.downloader",
+  "description": "IDM Modern Native Messaging Host",
+  "path": "idm_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://*",
+    "edge-extension://*"
+  ]
+}
+

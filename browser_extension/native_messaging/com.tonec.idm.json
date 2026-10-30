@@ -1,0 +1,12 @@
+{
+  "name": "com.tonec.idm",
+  "description": "Internet Downloader Native Messaging Host for IDM Extension",
+  "path": "idm_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://ngpampappnmepgilojfohadhhmbhlaek/",
+    "chrome-extension://*",
+    "edge-extension://*"
+  ]
+}
+

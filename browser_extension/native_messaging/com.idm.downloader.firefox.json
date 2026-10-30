@@ -1,0 +1,10 @@
+{
+  "name": "com.idm.downloader",
+  "description": "IDM Modern Native Messaging Host for Firefox",
+  "path": "idm_host.bat",
+  "type": "stdio",
+  "allowed_extensions": [
+    "idm-modern@antigravity.internal"
+  ]
+}
+
